@@ -1,0 +1,81 @@
+services:
+  frontend-react-js:
+    environment:
+      REACT_APP_BACKEND_URL: ${BACKEND_URL}
+      REACT_APP_OTEL_COLLECTOR_ENDPOINT: ${OTEL_COLLECTOR_ENDPOINT}
+    build:
+      context: frontend-react-js
+      target: development
+    container_name: frontend-react-js
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend-react-js:/frontend-react-js
+  backend-flask:
+    environment:
+      FRONTEND_URL: ${FRONTEND_URL}
+      BACKEND_URL: ${BACKEND_URL}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_HEADERS: "x-honeycomb-team=${DEV_HONEYCOMB_COLLECTOR_API_KEY}"
+      OTEL_SERVICE_NAME: "${HONEYCOMB_SERVICE_NAME}"
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      AWS_XRAY_URL: "${BACKEND_URL}"
+      AWS_XRAY_DAEMON_ADDRESS: "${AWS_XRAY_DAEMON_ADDRESS}"
+      ROLLBAR_ACCESS_TOKEN: "${ROLLBAR_ACCESS_TOKEN}"
+    build: 
+      context: backend-flask
+      target: development
+    ports:
+      - 4567:4567
+    volumes:
+      - ./backend-flask:/backend-flask
+  db:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - db:/var/lib/postgresql/data
+  dynamodb-local:
+    # https://stackoverflow.com/questions/67533058/persist-local-dynamodb-data-in-volumes-lack-permission-unable-to-open-databa
+    # We needed to add user:root to get this working.
+    user: root
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - 8000:8000
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  xray-daemon:
+    image: "amazon/aws-xray-daemon"
+    environment:
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      AWS_REGION: "ca-central-1"
+    command:
+      - "-o"
+      - "--log-level=debug"
+      - "--bind=xray-daemon:2000"
+    ports:
+      - 2000:2000/udp
+  otel-collector:
+    environment:
+      FRONTEND_URL_HTTPS: "https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
+      FRONTEND_URL_HTTP: "http://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
+      HONEYCOMB_API_KEY: "${HONEYCOMB_API_KEY}"
+    image: otel/opentelemetry-collector
+    command: [ --config=/etc/otel-collector-config.yaml ]
+    volumes:
+      - "./otel-collector-config.yaml:/etc/otel-collector-config.yaml"
+    ports:
+      - 4318:4318 # OTLP http receiver
+volumes:
+  db:
+    driver: local
