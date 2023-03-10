@@ -17,7 +17,7 @@ const exporter = new OTLPTraceExporter({
 
 const provider = new WebTracerProvider({
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'browser',
+    [SemanticResourceAttributes.SERVICE_NAME]: `${process.env.OTEL_SERVICE_NAME}`,
   }),
 });
 
