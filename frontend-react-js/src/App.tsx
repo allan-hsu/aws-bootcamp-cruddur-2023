@@ -15,6 +15,14 @@ import {
 } from "react-router-dom";
 import { NotificationsPage } from './pages/NotificationsPage';
 
+// AWS Cognito Auth
+import { Amplify } from 'aws-amplify';
+import { cognitoConfig } from './awsconfig';
+import { AuthProvider } from './store/authentication';
+
+Amplify.configure(cognitoConfig);
+
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -57,7 +65,9 @@ const router = createBrowserRouter([
 const App = () => {
   return (
     <>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </>
   );
 }

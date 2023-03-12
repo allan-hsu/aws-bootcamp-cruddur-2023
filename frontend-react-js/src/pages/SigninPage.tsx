@@ -1,39 +1,44 @@
 import './SigninPage.css';
 import React from "react";
-import {ReactComponent as Logo} from '../components/svg/logo.svg';
+import { ReactComponent as Logo } from '../components/svg/logo.svg';
 import { Link } from "react-router-dom";
-
-// [TODO] Authenication
-// import Cookies from 'js-cookie'
+import { Auth } from 'aws-amplify';
+import { useAuth } from '../store/authentication';
 
 export default function SigninPage() {
 
-  const [email, setEmail] = React.useState('');
+  const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [errors, setErrors] = React.useState('');
+  const { setUser, setAuthToken } = useAuth();
 
-  const onsubmit = async (event: { preventDefault: () => void; }) => {
-    event.preventDefault();
+  const onsubmit = async (event: any) => {
     setErrors('')
-    console.log('onsubmit')
-    // if (Cookies.get('user.email') === email && Cookies.get('user.password') === password){
-    //   Cookies.set('user.logged_in', true)
-    //   window.location.href = "/"
-    // } else {
-    //   setErrors("Email and password is incorrect or account doesn't exist")
-    // }
+    event.preventDefault();
+    Auth.signIn(username, password)
+      .then(user => {
+        setAuthToken(user.signInUserSession.accessToken.jwtToken);
+        window.location.href = "/";
+      })
+      .catch(err => {
+        if (err.code == 'UserNotConfirmedException') {
+          window.location.href = "/confirm"
+        }
+        setErrors(err.message);
+      });
     return false
   }
 
-  const email_onchange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
-    setEmail(event.target.value);
+
+  const username_onchange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+    setUsername(event.target.value);
   }
   const password_onchange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
     setPassword(event.target.value);
   }
 
   let el_errors;
-  if (errors){
+  if (errors) {
     el_errors = <div className='errors'>{errors}</div>;
   }
 
@@ -43,18 +48,18 @@ export default function SigninPage() {
         <Logo className='logo' />
       </div>
       <div className='signin-wrapper'>
-        <form 
+        <form
           className='signin_form'
           onSubmit={onsubmit}
         >
           <h2>Sign into your Cruddur account</h2>
           <div className='fields'>
             <div className='field text_field username'>
-              <label>Email</label>
+              <label>User Name</label>
               <input
                 type="text"
-                value={email}
-                onChange={email_onchange} 
+                value={username}
+                onChange={username_onchange}
               />
             </div>
             <div className='field text_field password'>
@@ -62,7 +67,7 @@ export default function SigninPage() {
               <input
                 type="password"
                 value={password}
-                onChange={password_onchange} 
+                onChange={password_onchange}
               />
             </div>
           </div>

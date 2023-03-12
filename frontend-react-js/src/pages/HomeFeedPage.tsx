@@ -6,20 +6,15 @@ import DesktopSidebar from "../components/DesktopSidebar";
 import ActivityFeed from "../components/ActivityFeed";
 import ActivityForm from "../components/ActivityForm";
 import ReplyForm from "../components/ReplyForm";
-// import { withTracing } from "../services/honeycomb";
-
-// [TODO] Authenication
-// import Cookies from 'js-cookie'
+import { useAuth } from "../store/authentication";
+import { Auth } from 'aws-amplify';
 
 export default function HomeFeedPage() {
   const [activities, setActivities] = React.useState([]);
   const [popped, setPopped] = React.useState(false);
   const [poppedReply, setPoppedReply] = React.useState(false);
   const [replyActivity, setReplyActivity] = React.useState({});
-  const [user, setUser] = React.useState({
-    display_name: 'allanhsu',
-    handle: 'allanhsu',
-  });
+  const { user, setUser } = useAuth();
   const dataFetchedRef = React.useRef(false);
 
   const loadData = async () => {
@@ -27,6 +22,9 @@ export default function HomeFeedPage() {
       const backend_url = `${process.env.REACT_APP_BACKEND_URL}/api/activities/home`;
       const res = await fetch(backend_url, {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+        }
       });
       let resJson = await res.json();
       if (res.status === 200) {
@@ -40,14 +38,22 @@ export default function HomeFeedPage() {
   };
 
   const checkAuth = async () => {
-    console.log("checkAuth");
-    // [TODO] Authenication
-    // if (Cookies.get('user.logged_in')) {
-    //   setUser({
-    //     display_name: Cookies.get('user.name'),
-    //     handle: Cookies.get('user.username')
-    //   })
-    // }
+    Auth.currentAuthenticatedUser({
+      // Optional, By default is false. 
+      // If set to true, this call will send a 
+      // request to Cognito to get the latest user data
+      bypassCache: false
+    })
+      .then((user) => {
+        console.log('user', user);
+        return Auth.currentAuthenticatedUser()
+      }).then((cognito_user) => {
+        setUser?.({
+          username: cognito_user.attributes.name,
+          handle: cognito_user.attributes.preferred_username
+        })
+      })
+      .catch((err) => console.log(err));
   };
 
   React.useEffect(() => {

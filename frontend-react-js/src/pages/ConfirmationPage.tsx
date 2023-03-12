@@ -2,15 +2,15 @@ import "./ConfirmationPage.css";
 import React from "react";
 import { useParams } from "react-router-dom";
 import { ReactComponent as Logo } from "../components/svg/logo.svg";
-
-// [TODO] Authenication
-// import Cookies from 'js-cookie'
+import { Auth } from "aws-amplify";
+import { useAuth } from "../store/authentication";
 
 export default function ConfirmationPage() {
-  const [email, setEmail] = React.useState("");
+  const [username, setUsername] = React.useState("");
   const [code, setCode] = React.useState("");
   const [errors, setErrors] = React.useState("");
   const [codeSent, setCodeSent] = React.useState(false);
+  const { setAuthToken } = useAuth();
 
   const params = useParams();
 
@@ -19,36 +19,41 @@ export default function ConfirmationPage() {
   }) => {
     setCode(event.target.value);
   };
-  const email_onchange = (event: {
+  const username_onchange = (event: {
     target: { value: React.SetStateAction<string> };
   }) => {
-    setEmail(event.target.value);
+    setUsername(event.target.value);
   };
 
-  const resend_code = async () => {
-    console.log("resend_code");
-    // [TODO] Authenication
-  };
+  const resend_code = async (event: any) => {
+    setErrors('')
+    try {
+      await Auth.resendSignUp(username);
+      console.log('code resent successfully');
+      setCodeSent(true)
+    } catch (err: any) {
+      console.log(err)
+      if (err.message == 'Username cannot be empty') {
+        setErrors("You need to provide an email in order to send Resend Activiation Code")
+      } else if (err.message == "Username/client id combination not found.") {
+        setErrors("Email is invalid or cannot be found.")
+      }
+    }
+  }
 
-  const onsubmit = async (event: { preventDefault: () => void }) => {
+
+  const onsubmit = async (event: any) => {
     event.preventDefault();
-    console.log("ConfirmationPage.onsubmit");
-    // [TODO] Authenication
-    // if (Cookies.get('user.email') === undefined || Cookies.get('user.email') === '' || Cookies.get('user.email') === null){
-    //   setErrors("You need to provide an email in order to send Resend Activiation Code")
-    // } else {
-    //   if (Cookies.get('user.email') === email){
-    //     if (Cookies.get('user.confirmation_code') === code){
-    //       Cookies.set('user.logged_in',true)
-    //       window.location.href = "/"
-    //     } else {
-    //       setErrors("Code is not valid")
-    //     }
-    //   } else {
-    //     setErrors("Email is invalid or cannot be found.")
-    //   }
-    return false;
-  };
+    setErrors('')
+    try {
+      await Auth.confirmSignUp(username, code);
+
+      window.location.href = "/";
+    } catch (error: any) {
+      setErrors(error.message)
+    }
+    return false
+  }
 
   let code_button;
   if (codeSent) {
@@ -67,10 +72,11 @@ export default function ConfirmationPage() {
 
   React.useEffect(() => {
     if (params.email) {
-      setEmail(params.email);
+      setUsername(params.email);
     }
   }, []);
 
+  // Unhandled Promise rejection: – "This URL is invalid" – "; Zone:" – "<root>" – "; Task:" – "Promise.then" – "; Value:" (2)
   return (
     <article className="confirm-article">
       <div className="recover-info">
@@ -78,11 +84,11 @@ export default function ConfirmationPage() {
       </div>
       <div className="recover-wrapper">
         <form className="confirm_form" onSubmit={onsubmit}>
-          <h2>Confirm your Email</h2>
+          <h2>Confirm your User</h2>
           <div className="fields">
             <div className="field text_field email">
-              <label>Email</label>
-              <input type="text" value={email} onChange={email_onchange} />
+              <label>User name</label>
+              <input type="text" value={username} onChange={username_onchange} />
             </div>
             <div className="field text_field code">
               <label>Confirmation Code</label>
@@ -91,7 +97,7 @@ export default function ConfirmationPage() {
           </div>
           {errors && <div className="errors">{errors}</div>}
           <div className="submit">
-            <button type="submit">Confirm Email</button>
+            <button type="submit">Confirm User</button>
           </div>
         </form>
       </div>
