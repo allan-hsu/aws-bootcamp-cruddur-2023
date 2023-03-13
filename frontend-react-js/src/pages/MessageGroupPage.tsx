@@ -6,12 +6,13 @@ import DesktopNavigation from '../components/DesktopNavigation';
 import MessageGroupFeed from '../components/MessageGroupFeed';
 import MessagesFeed from '../components/MessageFeed';
 import MessagesForm from '../components/MessageForm';
+import { useAuth } from '../store/authentication';
 
 export default function MessageGroupPage() {
   const [messageGroups, setMessageGroups] = React.useState([]);
   const [messages, setMessages] = React.useState([]);
   const [popped, setPopped] = React.useState([]);
-  const [user, setUser] = React.useState(null);
+  const { user } = useAuth();
   const dataFetchedRef = React.useRef(false);
   const params = useParams();
 

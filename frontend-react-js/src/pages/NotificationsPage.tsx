@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import DesktopNavigation from "../components/DesktopNavigation";
 import DesktopSidebar from "../components/DesktopSidebar";
 import MessageItem from "../components/MessageItem";
+import { useAuth } from "../store/authentication";
 export const NotificationsPage = () => {
     const [notifications, setNotifications] = useState([]);
     const [popped, setPopped] = useState(true);
-    const [user, setUser] = useState(null);
-
-
+    const { user } = useAuth();
 
     const loadNotificationsData = async () => {
         try {

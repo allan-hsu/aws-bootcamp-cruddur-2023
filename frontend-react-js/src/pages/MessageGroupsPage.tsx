@@ -1,16 +1,14 @@
 import './MessageGroupsPage.css';
 import React from "react";
 
-import DesktopNavigation  from '../components/DesktopNavigation';
+import DesktopNavigation from '../components/DesktopNavigation';
 import MessageGroupFeed from '../components/MessageGroupFeed';
-
-// [TODO] Authenication
-// import Cookies from 'js-cookie'
+import { useAuth } from '../store/authentication';
 
 export default function MessageGroupsPage() {
   const [messageGroups, setMessageGroups] = React.useState([]);
   const [popped, setPopped] = React.useState([]);
-  const [user, setUser] = React.useState(null);
+  const { user } = useAuth();
   const dataFetchedRef = React.useRef(false);
 
   const loadData = async () => {
@@ -28,7 +26,7 @@ export default function MessageGroupsPage() {
     } catch (err) {
       console.log(err);
     }
-  };  
+  };
 
   const checkAuth = async () => {
     console.log('checkAuth')
@@ -41,7 +39,7 @@ export default function MessageGroupsPage() {
     // }
   };
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     //prevents double call
     if (dataFetchedRef.current) return;
     dataFetchedRef.current = true;

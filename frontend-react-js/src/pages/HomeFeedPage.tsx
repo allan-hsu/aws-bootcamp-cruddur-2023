@@ -14,7 +14,7 @@ export default function HomeFeedPage() {
   const [popped, setPopped] = React.useState(false);
   const [poppedReply, setPoppedReply] = React.useState(false);
   const [replyActivity, setReplyActivity] = React.useState({});
-  const { user, setUser } = useAuth();
+  const { user, setUser, authToken } = useAuth();
   const dataFetchedRef = React.useRef(false);
 
   const loadData = async () => {
@@ -23,7 +23,8 @@ export default function HomeFeedPage() {
       const res = await fetch(backend_url, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
         }
       });
       let resJson = await res.json();
@@ -45,7 +46,6 @@ export default function HomeFeedPage() {
       bypassCache: false
     })
       .then((user) => {
-        console.log('user', user);
         return Auth.currentAuthenticatedUser()
       }).then((cognito_user) => {
         setUser?.({
@@ -53,7 +53,9 @@ export default function HomeFeedPage() {
           handle: cognito_user.attributes.preferred_username
         })
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   React.useEffect(() => {

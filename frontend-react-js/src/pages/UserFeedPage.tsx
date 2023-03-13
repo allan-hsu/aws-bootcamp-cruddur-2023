@@ -6,14 +6,12 @@ import DesktopNavigation from "../components/DesktopNavigation";
 import DesktopSidebar from "../components/DesktopSidebar";
 import ActivityFeed from "../components/ActivityFeed";
 import ActivityForm from "../components/ActivityForm";
-
-// [TODO] Authenication
-// import Cookies from 'js-cookie'
+import { useAuth } from "../store/authentication";
 
 export default function UserFeedPage() {
   const [activities, setActivities] = React.useState([]);
   const [popped, setPopped] = React.useState([]);
-  const [user, setUser] = React.useState(null);
+  const { user } = useAuth();
   const dataFetchedRef = React.useRef(false);
 
   const params = useParams();

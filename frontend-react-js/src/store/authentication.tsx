@@ -19,14 +19,17 @@ export const AuthContext = createContext<IAuthContext>({
 
 export const useAuth = () => {
     const { user, setUser } = useContext(AuthContext);
+    const [authTokenState, setAuthTokenState] = useState(localStorage.getItem('access_token'));
 
     const setAuthToken = (accessToken: string) => {
-        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('access_token', accessToken);
+        setAuthTokenState(accessToken);
     };
 
     return {
         user,
         setAuthToken,
+        authToken: authTokenState,
         setUser
     }
 };
