@@ -31,10 +31,21 @@ services:
     build:
       context: backend-flask
       target: development
-    ports:
-      - 4567:4567
     volumes:
       - ./backend-flask:/backend-flask
+    network_mode: "service:jwt-verify-sidecar"
+  jwt-verify-sidecar:
+    build:
+      context: ./jwt-verify-sidecar
+      target: development
+    environment:
+      BACKEND_URL: ${BACKEND_URL}
+      AWS_COGNITO_USER_POOL_ID: ${AWS_COGNITO_USER_POOL_ID}
+      AWS_COGNITO_APP_CLIENT_ID: ${AWS_COGNITO_APP_CLIENT_ID}
+    volumes:
+      - ./jwt-verify-sidecar:/jwt-verify-sidecar
+    ports:
+      - 4567:4567
   db:
     image: postgres:13-alpine
     restart: always

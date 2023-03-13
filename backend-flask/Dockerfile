@@ -9,5 +9,5 @@ COPY . .
 
 ENV FLASK_DEBUG=True
 
-EXPOSE ${PORT}
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=4567"]
+# EXPOSE ${PORT}
+CMD [ "python3", "-m" , "flask", "run", "--host=127.0.0.1", "--port=4568"]

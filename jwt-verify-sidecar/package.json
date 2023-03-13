@@ -1,0 +1,21 @@
+{
+  "name": "jwt-verify-sidecar",
+  "version": "1.0.0",
+  "description": "container sidecar for flask backend api",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-jwt-verify": "^3.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.21"
+  }
+}
