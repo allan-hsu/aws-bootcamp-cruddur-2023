@@ -76,14 +76,14 @@ services:
       - "--log-level=debug"
       - "--bind=xray-daemon:2000"
     ports:
-      - 2000:2000/udp
+      - "2000:2000/udp"
   otel-collector:
     environment:
       FRONTEND_URL_HTTPS: "https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
       FRONTEND_URL_HTTP: "http://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}"
       HONEYCOMB_API_KEY: "${HONEYCOMB_API_KEY}"
     image: otel/opentelemetry-collector
-    command: [ --config=/etc/otel-collector-config.yaml ]
+    command: [--config=/etc/otel-collector-config.yaml]
     volumes:
       - "./otel-collector-config.yaml:/etc/otel-collector-config.yaml"
     ports:
@@ -92,7 +92,7 @@ services:
       # - 8889:8889 # Prometheus exporter metrics
       # - 13133:13133 # health_check extension
       # - 4317:4317 # OTLP gRPC receiver
-      - 4318:4318 # OTLP http receiver
+      - "4318:4318" # OTLP http receiver
       # - 55679:55679 # zpages extension
 
 networks:
